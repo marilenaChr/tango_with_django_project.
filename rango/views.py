@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rango.models import Category
 from django.http import HttpResponse
 from rango.models import Page
@@ -6,6 +6,8 @@ from rango.forms import CategoryForm, PageForm
 from django.shortcuts import redirect
 from django.urls import reverse
 from rango.forms import UserForm, UserProfileForm
+from rango.models import Category, Page
+from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
 
 def index(request):
 
@@ -88,8 +90,8 @@ def add_page(request, category_name_slug):
 
 
 def register(request):
-
     registered = False
+
     if request.method == 'POST':
         user_form = UserForm(request.POST)
         profile_form = UserProfileForm(request.POST)
@@ -104,19 +106,17 @@ def register(request):
 
             if 'picture' in request.FILES:
                 profile.picture = request.FILES['picture']
-                profile.save()
+            
+            profile.save()
+            registered = True
 
-                registered = True
-            else:
-                print(user_form.errors, profile_form.errors)
         else:
-            user_form = UserForm()
-            profile_form = UserProfileForm()
+            print(user_form.errors, profile_form.errors)
+    else:
+        user_form = UserForm()
+        profile_form = UserProfileForm()
 
-        return render(request, 'rango/register.html',
-                  context = {'user_form': user_form,
-                             'profile_form': profile_form,
-                             'registered': registered})
+    return render(request, 'rango/register.html', context = {'user_form': user_form,'profile_form': profile_form,'registered': registered})
 
 
 
