@@ -26,7 +26,7 @@ def index(request):
 
     context_dict['visits'] = int(request.COOKIES.get('visits', '1'))
 
-    visitor_cookie_handler(request, response)
+    
 
     return render(request, 'rango/index.html', context=context_dict)
 
@@ -162,6 +162,13 @@ def user_logout(request):
     return redirect(reverse('rango:index'))
 
 
+def get_server_side_cookie(request, cookie, default_val=None): 
+    val = request.session.get(cookie)
+    if not val:
+        val = default_val 
+    return val
+
+
 def visitor_cookie_handler(request, response):
     visits = int(request.COOKIES.get('visits', '1'))
 
@@ -169,10 +176,14 @@ def visitor_cookie_handler(request, response):
     last_visit_time = datetime.strptime(last_visit_cookie[:-7], '%Y-%m-%d %H:%M:%S')
 
     if (datetime.now() - last_visit_time).days > 0:
-        response.set_cookie('last_visit', str(datetime.now()))
-    else:
-        response.set_cookie('last_visit', last_visit_cookie)
+        visits = visits + 1
 
-    response.set_cookie('visits', visits)
+        request.session['last_visit'] = str(datetime.now())
+
+    else:
+        request.session['last_visit'] = last_visit_cookie
+
+        request.session['visits'] = visits
+    
 
 
